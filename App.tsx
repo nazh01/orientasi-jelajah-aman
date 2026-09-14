@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import WeatherCard from "./components/WeatherCard";
 import SearchBox from "./components/SearchBox";
 import RiwayatList from "./components/RiwayatList";
+import IndikatorAQI from "./components/IndikatorAQI";
 
 export default function HalamanUtama() {
   const [kotaAktif, setKotaAktif] = useState("Pekalongan");
@@ -24,6 +25,7 @@ export default function HalamanUtama() {
       <SearchBox onCari={handleCari} />
       <WeatherCard kota={kotaAktif} suhu={29} tingkatAQI="BAIK" />
       <RiwayatList daftarKota={riwayat} />
+      <IndikatorAQI laporan={{ kota: kotaAktif, indeksAQI: 42, tingkat: "BAIK", diperbaruiPada: "14 September 2026" }} />
     </View>
   );
 }
