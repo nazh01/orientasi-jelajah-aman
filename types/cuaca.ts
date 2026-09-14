@@ -18,6 +18,6 @@ export interface WeatherCardProps {
 export interface LaporanUdara {
     kota: string;
     indeksAQI: number;
-    tingkatAQI: TingkatAQI;
+    tingkat: TingkatAQI;
     diperbaruiPada: string;
 }
