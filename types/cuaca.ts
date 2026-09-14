@@ -1,3 +1,4 @@
+// types/cuaca.ts
 export interface DataCuaca {
     kota: string;
     suhu: number;
@@ -11,4 +12,12 @@ export interface WeatherCardProps {
     kota: string;
     suhu: number;
     tingkatAQI: TingkatAQI;
+}
+
+// latihan mandiri
+export interface LaporanUdara {
+    kota: string;
+    indeksAQI: number;
+    tingkatAQI: TingkatAQI;
+    diperbaruiPada: string;
 }
