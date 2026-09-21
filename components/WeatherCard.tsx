@@ -2,7 +2,7 @@
 import { View, Text } from "react-native";
 import { WeatherCardProps } from "../types/cuaca";
 // 1. tambahkan baris import ini untuk memanggil  variabel dari style.ts
-import { typeScale, spacing } from "../constants/style";
+import { typeScale, spacing } from "../constants/styles";
 
 export default function WeatherCard({ kota, suhu, tingkatAQI }: WeatherCardProps) {
     const warnaAQI = tingkatAQI === "BAIK" ? "green" : "orange";
