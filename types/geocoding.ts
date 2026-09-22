@@ -10,4 +10,4 @@ export interface HasilGeocoding {
 
 export interface GeocodingResponse { 
     results?: HasilGeocoding[]; // opsional -- tidak ada saat pencarian kosong 
-} 
+}
