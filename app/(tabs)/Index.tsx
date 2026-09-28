@@ -24,11 +24,11 @@ export default function HalamanUtama() {
       return; 
     } 
     ambilData(teksTertunda); 
-  }, [teksTertunda]); 
+  }, [teksTertunda]);
   
   async function ambilData(nama: string) { 
     setSedangMemuat(true); 
-    setPesanError(null); 
+    setPesanError(null);
     try { 
       const data = await cariKota(nama); 
       setHasil(data); 
