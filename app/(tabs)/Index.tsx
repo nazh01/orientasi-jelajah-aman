@@ -15,7 +15,9 @@ export default function HalamanUtama() {
   const [sedangMemuat, setSedangMemuat] = useState(false); 
   const [pesanError, setPesanError] = useState<string | null>(null); 
 
-  const teksTertunda = useDebounce(teksCari, 500); 
+  // latihan mandiri
+  // mengubah delay debounce dari 500ms menjadi 800ms
+  const teksTertunda = useDebounce(teksCari, 800); 
 
   useEffect(() => { 
     if (teksTertunda.trim().length === 0) { 
@@ -47,15 +49,22 @@ export default function HalamanUtama() {
   
       {pesanError && ( 
         <View> 
-          <Text>{pesanError}</Text> 
+          <Text accessibilityLabel= "Pesan kesalahan saat mengambil data kota">{pesanError}</Text> 
           <Button title="Coba Lagi" onPress={() => ambilData(teksTertunda)} /> 
         </View>
           )} 
 
-      {!sedangMemuat && !pesanError && teksTertunda.length > 0 && hasil.length === 0 
-&& ( 
-        <Text>Kota tidak ditemukan</Text> 
+      // kondisi kota tidak ditemukan
+      {!sedangMemuat && !pesanError && teksTertunda.length > 0 && hasil.length === 0 && (
+        <Text accessibilityLabel="Pesan bahwa kota tidak ditemukan">Kota tidak ditemukan</Text>
       )} 
+
+      // indikator jumlah hasil pencarian
+      {!sedangMemuat && !pesanError && teksTertunda.length > 0 &&hasil.length > 0 && (
+        <Text accessibilityLabel="Indikator jumlah hasil pencarian">
+          Ditemukan {hasil.length} kota
+        </Text>
+      )}
 
       {hasil.map((kota) => ( 
         <WeatherCard key={kota.id} kota={kota.name} suhu={29} tingkatAQI="BAIK" /> 
