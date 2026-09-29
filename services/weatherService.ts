@@ -37,7 +37,7 @@ export async function ambilCuaca(
                 suhuMinimal: data.daily.temperature_2m_min,
                 kodeCuaca: data.daily.weather_code,
             },
-    };
+        };
     } catch (err) {
     if (err instanceof Error && err.name === "AbortError") {
         throw new Error("Permintaan cuaca melebihi batas waktu, coba lagi");
@@ -45,5 +45,5 @@ export async function ambilCuaca(
     throw err;
     } finally {
         clearTimeout(timer);
-}
+    }
 }
