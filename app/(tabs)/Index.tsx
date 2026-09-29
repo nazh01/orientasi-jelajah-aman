@@ -24,7 +24,7 @@ export default function HalamanUtama() {
   const [sedangMemuat, setSedangMemuat] = useState(false);
   const [pesanError, setPesanError] = useState<string | null>(null);
   
-  const teksTertunda = useDebounce(teksCari, 500);
+  const teksTertunda = useDebounce(teksCari, 800);
   const requestIdRef = useRef(0); // pencegah race condition
   
   useEffect(() => {
@@ -45,7 +45,7 @@ export default function HalamanUtama() {
       const [dataCuaca, dataAQI] = await Promise.all([
       ambilCuaca(kota.latitude, kota.longitude),
       ambilKualitasUdara(kota.latitude, kota.longitude),
-    ]);
+      ]);
 
     if (idSaatIni !== requestIdRef.current) return; // hasil basi, abaikan
 
@@ -61,7 +61,7 @@ export default function HalamanUtama() {
 
   return (
     <SafeAreaView style={{ flex: 1, padding: 16, gap: 16 }}>
-      <SearchBox onCari={setTeksCari} />
+      <SearchBox onCari={setTeksCari}/>
 
       {hasilPencarian.map((kota) => (
         <TouchableOpacity key={kota.id} onPress={() => pilihKota(kota)}>
