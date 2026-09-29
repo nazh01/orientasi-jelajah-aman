@@ -96,7 +96,7 @@ export default function HalamanUtama() {
         </Text>
       )}
 
-      <AtribusiCuaca />
+      <AtribusiCuaca/>
     </SafeAreaView>
   );
 }
