@@ -54,12 +54,12 @@ export default function HalamanUtama() {
         </View>
           )} 
 
-      // kondisi kota tidak ditemukan
+      {/* kondisi kota tidak ditemukan */}
       {!sedangMemuat && !pesanError && teksTertunda.length > 0 && hasil.length === 0 && (
         <Text accessibilityLabel="Pesan bahwa kota tidak ditemukan">Kota tidak ditemukan</Text>
       )} 
 
-      // indikator jumlah hasil pencarian
+      {/* indikator jumlah hasil pencarian */}
       {!sedangMemuat && !pesanError && teksTertunda.length > 0 &&hasil.length > 0 && (
         <Text accessibilityLabel="Indikator jumlah hasil pencarian">
           Ditemukan {hasil.length} kota
