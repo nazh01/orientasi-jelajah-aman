@@ -138,6 +138,7 @@ export default function HalamanUtama() {
             kota={kotaTerpilih.name}
             suhu={cuaca.saatIni.suhu}
             tingkatAQI={konversiTingkatAQI(kualitasUdara.indeksAQI)}
+            indeksAQI={kualitasUdara.indeksAQI}
           />
           <Button
             title={
@@ -160,7 +161,7 @@ export default function HalamanUtama() {
           />
         </>
       )}
-      
+
       {cuaca && (
         <Text style={{ fontSize: 12, color: "#888" }}>
           Kondisi: {labelKodeCuaca(cuaca.saatIni.kodeCuaca)} • Angin {cuaca.saatIni.kecepatanAngin} km/j
