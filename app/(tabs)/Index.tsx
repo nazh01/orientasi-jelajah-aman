@@ -82,12 +82,24 @@ export default function HalamanUtama() {
       )}
 
       {cuaca && kualitasUdara && kotaTerpilih && !sedangMemuat && (
-        <WeatherCard
-          kota={kotaTerpilih.name}
-          suhu={cuaca.saatIni.suhu}
-          tingkatAQI={konversiTingkatAQI(kualitasUdara.indeksAQI)}
-          indeksAQI={kualitasUdara.indeksAQI}
-        />
+        <>
+          <WeatherCard
+            kota={kotaTerpilih.name}
+            suhu={cuaca.saatIni.suhu}
+            tingkatAQI={konversiTingkatAQI(kualitasUdara.indeksAQI)}
+            indeksAQI={kualitasUdara.indeksAQI}
+          />
+
+          <View>
+            <Text style={{ fontSize: 14 }}>
+              Suhu Maksimal: {cuaca.harian.suhuMaksimal[0]}°C
+            </Text>
+
+            <Text style={{ fontSize: 14 }}>
+              Suhu Minimal: {cuaca.harian.suhuMinimal[0]}°C
+            </Text>
+          </View>
+        </>
       )}
 
       {cuaca && (
@@ -95,6 +107,16 @@ export default function HalamanUtama() {
           Kondisi: {labelKodeCuaca(cuaca.saatIni.kodeCuaca)} • Angin {cuaca.saatIni.kecepatanAngin} km/j
         </Text>
       )}
+
+      <View>
+        <Text style={{ fontSize: 11, color: "#888", textAlign: "center" }}>
+          PM2.5: {kualitasUdara?.pm25 ?? "-"} µg/m³
+        </Text>
+
+        <Text style={{ fontSize: 11, color: "#888", textAlign: "center" }}>
+          PM10: {kualitasUdara?.pm10 ?? "-"} µg/m³
+        </Text>
+      </View>
 
       <AtribusiCuaca/>
     </SafeAreaView>
