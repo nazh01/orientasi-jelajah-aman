@@ -1,6 +1,6 @@
 // app/(tabs)/riwayat.tsx
 import { useState, useCallback } from "react";
-import { View, Text, Button, Alert } from "react-native";
+import { View, Text, Button, Alert, Platform } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -17,15 +17,37 @@ export default function TabRiwayat() {
     );
 
     async function hapus(id: number, nama: string) {
+        const prosesHapus = async () => {
+            await hapusFavorit(id);
+            setDaftarFavorit((prev) =>
+                prev.filter((k) => k.id !== id)
+            );
+        };
+
+        if (Platform.OS === "web") {
+            const yakin = window.confirm(
+                `Apakah Anda yakin ingin menghapus ${nama} dari favorit?`
+            );
+
+            if (yakin) {
+                await prosesHapus();
+            }
+
+            return;
+        }
+
         Alert.alert(
             "Konfirmasi",
             `Apakah Anda yakin ingin menghapus ${nama} dari favorit?`,
             [
                 { text: "Batal", style: "cancel" },
-                { text: "Hapus", style: "destructive", onPress: async () => {
-                    await hapusFavorit(id);
-                    setDaftarFavorit((prev) => prev.filter((k) => k.id !== id));
-                }}
+                {
+                    text: "Hapus",
+                    style: "destructive",
+                    onPress: () => {
+                        void prosesHapus();
+                    }, 
+                },
             ]
         );
     }
