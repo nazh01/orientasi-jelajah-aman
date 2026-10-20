@@ -17,6 +17,8 @@ import { labelKodeCuaca } from "../../constants/weatherCodes";
 import { HasilGeocoding } from "../../types/geocoding";
 import { DataCuacaLengkap, DataKualitasUdara } from "../../types/weather";
 import { ambilSemuaFavorit } from "../../services/favoritStorage";
+import { DAFTAR_KOTA_LOKAL } from  "../../constants/kotaOffline"
+import { simpanCuacaOffline, ambilCuacaOffline, } from "../../services/offlineStorage";
 
 export default function HalamanUtama() {
   const [teksCari, setTeksCari] = useState("");
@@ -33,12 +35,44 @@ export default function HalamanUtama() {
   const requestIdRef = useRef(0); // pencegah race condition
   
   useEffect(() => {
-    if (teksTertunda.trim().length === 0) {
+    const kataKunci = teksTertunda.trim();
+
+    if (kataKunci.length === 0) {
       setHasilPencarian([]);
       return;
     }
-    cariKota(teksTertunda).then(setHasilPencarian).catch(() => setHasilPencarian([]));
-  }, [teksTertunda]);
+
+    let masihAktif = true;
+
+    async function cariKotaOnline() {
+      try {
+        // Cari kota menggunakan API Geocoding
+        const hasil = await cariKota(kataKunci);
+
+        if (masihAktif) {
+          setHasilPencarian(hasil);
+        }
+      } catch (error) {
+        // Jika internet/API gagal, gunakan daftar lokal
+        const kata = kataKunci.toLowerCase();
+
+        const hasilLokal = DAFTAR_KOTA_LOKAL.filter((kota) =>
+          kota.name.toLowerCase().includes(kata)
+        );
+
+        if (masihAktif) {
+          setHasilPencarian(hasilLokal);
+        }
+      }
+    }
+
+  cariKotaOnline();
+
+  return () => {
+    masihAktif = false;
+  };
+}, [teksTertunda]);
+
 
   useFocusEffect(
     useCallback(() => {
@@ -63,27 +97,75 @@ export default function HalamanUtama() {
 
   async function pilihKota(kota: HasilGeocoding) {
     setKotaTerpilih(kota);
+
     const idSaatIni = ++requestIdRef.current;
+
     setSedangMemuat(true);
     setPesanError(null);
 
     try {
+      // Coba mengambil data terbaru dari API
       const [dataCuaca, dataAQI] = await Promise.all([
-      ambilCuaca(kota.latitude, kota.longitude),
-      ambilKualitasUdara(kota.latitude, kota.longitude),
+        ambilCuaca(kota.latitude, kota.longitude),
+        ambilKualitasUdara(kota.latitude, kota.longitude),
       ]);
 
-    if (idSaatIni !== requestIdRef.current) return; // hasil basi, abaikan
-
-    setCuaca(dataCuaca);
-    setKualitasUdara(dataAQI);
-    } catch (err) {
+      // Abaikan hasil dari permintaan kota yang sudah tidak aktif
       if (idSaatIni !== requestIdRef.current) return;
-        setPesanError("Gagal memuat data cuaca. Periksa koneksi internet Anda.");
-      } finally {
-      if (idSaatIni === requestIdRef.current) setSedangMemuat(false);
+
+      setCuaca(dataCuaca);
+      setKualitasUdara(dataAQI);
+
+      // Simpan data berhasil diambil agar bisa dipakai saat offline
+      try {
+        await simpanCuacaOffline(
+          kota.id,
+          dataCuaca,
+          dataAQI
+        );
+      } catch (error) {
+        console.warn("Gagal menyimpan cache cuaca:", error);
+      }
+    } catch (error) {
+      if (idSaatIni !== requestIdRef.current) return;
+
+      // API gagal, coba gunakan data yang tersimpan di HP
+      try {
+        const dataLokal = await ambilCuacaOffline(kota.id);
+
+        if (idSaatIni !== requestIdRef.current) return;
+
+        if (dataLokal) {
+          setCuaca(dataLokal.cuaca);
+          setKualitasUdara(dataLokal.kualitasUdara);
+
+          setPesanError(
+            `Mode offline. Data terakhir disimpan: ${
+              new Date(dataLokal.waktuSimpan).toLocaleString("id-ID")
+            }`
+          );
+        } else {
+          setCuaca(null);
+          setKualitasUdara(null);
+
+          setPesanError(
+            "Data offline untuk kota ini belum tersedia. Hubungkan internet dan pilih kota ini terlebih dahulu."
+          );
+        }
+      } catch (errorLokal) {
+        if (idSaatIni !== requestIdRef.current) return;
+
+        setPesanError(
+          "Data cuaca tidak dapat diambil. Periksa koneksi internet dan penyimpanan lokal."
+        );
+      }
+    } finally {
+      if (idSaatIni === requestIdRef.current) {
+        setSedangMemuat(false);
+      }
     }
   }
+
 
   async function gunakanLokasiSaatIni() {
     const status = await mintaIzinLokasi();
