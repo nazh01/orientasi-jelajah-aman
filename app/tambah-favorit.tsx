@@ -2,8 +2,10 @@
 import { View, Text, Button } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { tambahFavorit } from "../services/favoritStorage";
+import { useTema } from "../contexts/ThemeContext";
 
 export default function ModalTambahFavorit() {
+    const { warna } = useTema();
     const { id, nama, lat, lon } = useLocalSearchParams<{
         id: string;
         nama: string;
@@ -22,8 +24,10 @@ export default function ModalTambahFavorit() {
     }
 
     return (
-        <View style={{ padding: 16, gap: 16 }}>
-            <Text>Tambahkan {nama} ke daftar favorit?</Text>
+        <View style={{ padding: 16, gap: 16, backgroundColor: warna.background }}>
+            <Text style={{ color: warna.text }}>
+                Tambahkan {nama} ke daftar favorit?
+            </Text>
             <Button title="Simpan" onPress={simpan} />
         </View>
     );
