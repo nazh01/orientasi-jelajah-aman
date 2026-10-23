@@ -43,3 +43,9 @@ export async function ambilCuacaOffline(
 
     return JSON.parse(json) as DataCuacaOffline;
 }
+
+export async function hapusCuacaOffline(
+    idKota: number | string
+): Promise<void> {
+    await AsyncStorage.removeItem(buatKunciKota(idKota));
+}
