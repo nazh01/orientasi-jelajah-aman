@@ -4,6 +4,7 @@ import { router, useFocusEffect } from "expo-router";
 import { mintaIzinLokasi, ambilKoordinatSaatIni } from "../../services/locationService";
 import { View, Text, ActivityIndicator, Button, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useLocalSearchParams } from "expo-router";
 
 import SearchBox from "../../components/SearchBox";
 import WeatherCard from "../../components/WeatherCard";
@@ -19,8 +20,12 @@ import { DataCuacaLengkap, DataKualitasUdara } from "../../types/weather";
 import { ambilSemuaFavorit } from "../../services/favoritStorage";
 import { DAFTAR_KOTA_LOKAL } from  "../../constants/kotaOffline"
 import { simpanCuacaOffline, ambilCuacaOffline, } from "../../services/offlineStorage";
+import { simpanRiwayatPencarian, } from "../../services/riwayatStorage";
+import { useTema } from "../../contexts/ThemeContext";
 
 export default function HalamanUtama() {
+  const { warna } = useTema();
+
   const [teksCari, setTeksCari] = useState("");
   const [hasilPencarian, setHasilPencarian] = useState<HasilGeocoding[]>([]);
   const [kotaTerpilih, setKotaTerpilih] = useState<HasilGeocoding | null>(null);
@@ -33,7 +38,41 @@ export default function HalamanUtama() {
   
   const teksTertunda = useDebounce(teksCari, 800);
   const requestIdRef = useRef(0); // pencegah race condition
-  
+  const params = useLocalSearchParams<{
+    kotaId?: string;
+    kotaNama?: string;
+    latitude?: string;
+    longitude?: string;
+    country?: string;
+  }>();
+
+  useEffect(() => {
+    if (
+      !params.kotaId ||
+      !params.kotaNama ||
+      !params.latitude ||
+      !params.longitude
+    ) {
+      return;
+    }
+
+    const kota: HasilGeocoding = {
+      id: Number(params.kotaId),
+      name: params.kotaNama,
+      latitude: Number(params.latitude),
+      longitude: Number(params.longitude),
+      country: params.country ?? "",
+    };
+
+    void pilihKota(kota);
+  }, [
+    params.kotaId,
+    params.kotaNama,
+    params.latitude,
+    params.longitude,
+    params.country,
+  ]);
+
   useEffect(() => {
     const kataKunci = teksTertunda.trim();
 
@@ -102,6 +141,13 @@ export default function HalamanUtama() {
 
     setSedangMemuat(true);
     setPesanError(null);
+
+    // catat kota yang dipilih ke riwayat pencarian
+    try {
+      await simpanRiwayatPencarian(kota);
+    } catch (error) {
+      console.warn("Gagal menyimpan riwayat pencarian:", error);
+    }
 
     try {
       // Coba mengambil data terbaru dari API
@@ -191,14 +237,28 @@ export default function HalamanUtama() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, padding: 16, gap: 16 }}>
+    <SafeAreaView style={{ flex: 1, padding: 16, gap: 16, backgroundColor: warna.background }}>
       <SearchBox onCari={setTeksCari}/>
       <Button title="Gunakan Lokasi Saat Ini" onPress={gunakanLokasiSaatIni} />
-      {pesanLokasi && <Text>{pesanLokasi}</Text>}
+      {pesanLokasi && (
+        <Text style={{ color: warna.secondaryText }}>
+          {pesanLokasi}
+        </Text>
+      )}
 
       {hasilPencarian.map((kota) => (
-        <TouchableOpacity key={kota.id} onPress={() => pilihKota(kota)}>
-          <Text>{kota.name}</Text>
+        <TouchableOpacity
+            key={kota.id}
+            onPress={() => pilihKota(kota)}
+            style={{
+              padding: 10,
+              backgroundColor: warna.surface,
+              borderRadius: 8,
+            }}
+          >
+            <Text style={{ color: warna.text }}>
+              {kota.name}
+            </Text>
         </TouchableOpacity>
       ))}
 
@@ -206,11 +266,13 @@ export default function HalamanUtama() {
 
       {pesanError && (
         <View>
-          <Text>{pesanError}</Text>
-        <Button
-          title="Coba Lagi"
-          onPress={() => kotaTerpilih && pilihKota(kotaTerpilih)}
-        />
+          <Text style={{ color: warna.text }}>
+            {pesanError}
+          </Text>
+          <Button
+            title="Coba Lagi"
+            onPress={() => kotaTerpilih && pilihKota(kotaTerpilih)}
+          />
         </View>
       )}
 
@@ -245,17 +307,17 @@ export default function HalamanUtama() {
       )}
 
       {cuaca && (
-        <Text style={{ fontSize: 12, color: "#888" }}>
+        <Text style={{ fontSize: 12, color: warna.secondaryText }}>
           Kondisi: {labelKodeCuaca(cuaca.saatIni.kodeCuaca)} • Angin {cuaca.saatIni.kecepatanAngin} km/j
         </Text>
       )}
 
       <View>
-        <Text style={{ fontSize: 11, color: "#888", textAlign: "center" }}>
+        <Text style={{ fontSize: 11, color: warna.secondaryText, textAlign: "center" }}>
           PM2.5: {kualitasUdara?.pm25 ?? "-"} µg/m³
         </Text>
 
-        <Text style={{ fontSize: 11, color: "#888", textAlign: "center" }}>
+        <Text style={{ fontSize: 11, color: warna.secondaryText, textAlign: "center" }}>
           PM10: {kualitasUdara?.pm10 ?? "-"} µg/m³
         </Text>
       </View>
