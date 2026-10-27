@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { router, useFocusEffect } from "expo-router";
 import { mintaIzinLokasi, ambilKoordinatSaatIni } from "../../services/locationService";
-import { View, Text, ActivityIndicator, Button, TouchableOpacity } from "react-native";
+import { View, Text, ActivityIndicator, Button, TouchableOpacity, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams } from "expo-router";
 
@@ -238,6 +238,16 @@ export default function HalamanUtama() {
 
   return (
     <SafeAreaView style={{ flex: 1, padding: 16, gap: 16, backgroundColor: warna.background }}>
+    <ScrollView 
+      style={{ flex: 1 }} 
+      contentContainerStyle={{
+        padding: 16,
+        paddingBottom: 40,
+        gap: 16,
+      }}
+      showsVerticalScrollIndicator={true}
+      keyboardShouldPersistTaps="handled"
+      >
       <SearchBox onCari={setTeksCari}/>
       <Button title="Gunakan Lokasi Saat Ini" onPress={gunakanLokasiSaatIni} />
       {pesanLokasi && (
@@ -323,6 +333,7 @@ export default function HalamanUtama() {
       </View>
 
       <AtribusiCuaca/>
+      </ScrollView>
     </SafeAreaView>
   );
 }
